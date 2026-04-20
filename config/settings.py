@@ -12,7 +12,6 @@ PROCESS_LOG_PATH = LOG_DIR / "process_monitor.log"
 
 # ── Service Checker ───────────────────────────────────────────────────────────
 TARGET_SERVICES: list[str] = [
-    "com.apple.AirPlayXPCHelper",
     "com.apple.Finder",
     "com.apple.Safari.SafeBrowsing.Service",
 ]
