@@ -6,6 +6,16 @@ Production-grade system health monitoring with configurable alert thresholds, st
 
 ---
 
+## Quick Start
+
+```bash
+make install   # create .venv and install dependencies
+make all       # run all checks (health + processes + services)
+make test      # run the full pytest suite
+```
+
+---
+
 ## What It Does
 
 Polls CPU, Memory, and Disk utilization on any Mac or Linux host. Compares live readings against configurable thresholds and emits a pass/fail result — either human-readable to the terminal or JSON for pipeline consumption. Every run is logged to `logs/health_check.log` with timestamps.
@@ -19,22 +29,31 @@ it-automation-python/
 ├── core/
 │   ├── __init__.py
 │   ├── system_health.py       # Health logic — CPU, memory, disk checks
-│   └── process_monitor.py     # Process logic — top-N, zombies, threshold flags
+│   ├── process_monitor.py     # Process logic — top-N, zombies, threshold flags
+│   └── service_checker.py     # launchd service health via launchctl
 ├── scripts/
 │   ├── run_health_check.py    # CLI: system health check
 │   ├── run_process_monitor.py # CLI: process monitor
+│   ├── run_service_checker.py # CLI: macOS service checker
 │   └── run_all_checks.py      # CLI: combined runner + JSON report
+├── tests/
+│   ├── __init__.py
+│   ├── test_health_check.py   # 17 tests — all mocked, no real psutil calls
+│   ├── test_process_monitor.py# 16 tests — two-pass mock, zombie + threshold
+│   └── test_service_checker.py# 11 tests — subprocess mock, CalledProcessError
 ├── tools/
 │   └── health_check.py        # Stdlib-only quick check (zero dependencies)
 ├── config/
 │   ├── thresholds.json        # Health check alert thresholds
-│   └── settings.py            # Process monitor constants
+│   └── settings.py            # Process + service constants + test mock values
 ├── logs/
 │   ├── health_check.log       # Auto-created on first run
 │   ├── process_monitor.log    # Auto-created on first run
+│   ├── service_checker.log    # Auto-created on first run
 │   └── report_YYYY-MM-DD_HHMMSS.json  # Combined report per run
 ├── docs/
 │   └── runbook.md
+├── Makefile                   # make install | health | processes | services | all | test | clean
 ├── requirements.txt
 └── .gitignore
 ```
@@ -230,15 +249,101 @@ Each run writes `logs/report_YYYY-MM-DD_HHMMSS.json` containing:
 
 ---
 
+## Service Checker
+
+Queries `launchctl list` to verify configured macOS launchd services are running. Marks any service with no PID as unhealthy. Results log to `logs/service_checker.log`.
+
+### Usage
+
+```bash
+# Show target services only (configured in config/settings.py)
+python scripts/run_service_checker.py
+
+# Show all detected services
+python scripts/run_service_checker.py --all
+
+# JSON output
+python scripts/run_service_checker.py --json
+```
+
+### Example Output
+
+```
+  Timestamp  : 2026-04-20 16:41:42
+  Overall    : ALERT
+  Targets    : 3
+  Unhealthy  : 1
+
+  Target Services:
+  ------------------------------------------------------------------------------------
+  SERVICE                                                  PID     EXIT HEALTHY  FLAG
+  ------------------------------------------------------------------------------------
+  com.apple.Finder                                        1678        0 True
+  com.apple.Safari.SafeBrowsing.Service                   1742        0 True
+  com.apple.AirPlayXPCHelper                                 -      N/A False    ⚠️  ALERT
+  ------------------------------------------------------------------------------------
+```
+
+Configure target services in `config/settings.py`:
+
+```python
+TARGET_SERVICES = [
+    "com.apple.AirPlayXPCHelper",
+    "com.apple.Finder",
+    "com.apple.Safari.SafeBrowsing.Service",
+]
+```
+
+---
+
+## Running Tests
+
+```bash
+# Run full suite via make
+make test
+
+# Or directly
+pytest tests/ -v
+```
+
+44 tests across 3 modules. All use mocks — no real system calls, no flakiness.
+
+| File | Tests | Covers |
+|---|---|---|
+| `test_health_check.py` | 17 | `check_cpu`, `check_memory`, `check_disk`, `run_health_check` |
+| `test_process_monitor.py` | 16 | top-N sorting, zombie detection, threshold breach, empty list |
+| `test_service_checker.py` | 11 | healthy/unhealthy parsing, missing targets, subprocess failure |
+
+---
+
+## Makefile
+
+```bash
+make install    # create .venv + install requirements
+make health     # run system health check
+make processes  # run process monitor
+make services   # run service checker
+make all        # run all checks + write JSON report
+make test       # run pytest suite
+make clean      # remove .pyc, __pycache__, log files
+make help       # print this list
+```
+
+---
+
 ## Why This Matters
 
 | Capability | What It Demonstrates |
 |---|---|
 | Modular architecture | `core/` separation of concerns — logic is reusable, not buried in scripts |
-| Config-driven design | Thresholds in JSON — no code changes to adjust behavior |
-| Structured logging | File + console dual-handler logging with timestamps |
-| CLI design | `argparse` with mutually exclusive output modes |
-| Exit codes | Pipeline-compatible — works with `&&`, CI pass/fail gates |
-| JSON output | Composable with dashboards, Slack webhooks, or monitoring stacks |
+| Config-driven design | Thresholds and targets in config — no code changes to tune behavior |
+| Structured logging | Per-module file + console dual-handler logging with timestamps |
+| CLI design | `argparse` across 4 entry points with consistent flag patterns |
+| Exit codes | Pipeline-compatible — works with `&&`, CI pass/fail gates, cron |
+| JSON output | Composable with dashboards, Slack webhooks, Lambda, or Datadog |
+| Unit test suite | 44 mocked tests — psutil, subprocess, and threshold boundary coverage |
+| subprocess automation | `launchctl` parsing with graceful error handling for non-zero exits |
+| Makefile ops | Single-command install, run, test, and clean — no manual venv activation |
+| Aggregated reporting | Combined JSON report written per run — audit trail for all checks |
 
-This pattern scales directly to fleet-wide monitoring, Lambda health checks, and Ansible playbook validation.
+This pattern scales directly to fleet-wide monitoring, Lambda health checks, Ansible playbook validation, and CI pipeline gates.

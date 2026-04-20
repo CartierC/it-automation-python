@@ -9,13 +9,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from config.settings import LOG_DIR
 from core.process_monitor import run_process_monitor
+from core.service_checker import run_service_checks
 from core.system_health import run_health_check
 
 
-def build_report(health_result, process_result) -> dict:
+def build_report(health_result, process_result, service_result) -> dict:
+    statuses = (health_result.overall, process_result.overall, service_result.overall)
     return {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "overall": "ALERT" if "ALERT" in (health_result.overall, process_result.overall) else "OK",
+        "overall": "ALERT" if "ALERT" in statuses else "OK",
         "health_check": {
             "overall": health_result.overall,
             "hostname": health_result.hostname,
@@ -38,6 +40,12 @@ def build_report(health_result, process_result) -> dict:
             "flagged_count": len(process_result.flagged),
             "processes": [p.as_dict() for p in process_result.processes],
         },
+        "service_checker": {
+            "overall": service_result.overall,
+            "target_count": len(service_result.targets),
+            "unhealthy_count": len(service_result.unhealthy),
+            "services": [s.as_dict() for s in service_result.targets],
+        },
     }
 
 
@@ -51,6 +59,7 @@ def write_report(report: dict) -> Path:
 def print_summary(report: dict, report_path: Path) -> None:
     hc = report["health_check"]
     pm = report["process_monitor"]
+    sc = report["service_checker"]
     overall = report["overall"]
     flag = "⚠️  ALERT" if overall == "ALERT" else "✓  OK"
 
@@ -87,6 +96,18 @@ def print_summary(report: dict, report_path: Path) -> None:
 
     lines += [
         "",
+        "  ── Service Checker ───────────────────────",
+        f"  Status     : {sc['overall']}",
+        f"  Targets    : {sc['target_count']}",
+        f"  Unhealthy  : {sc['unhealthy_count']}",
+    ]
+    if sc["unhealthy_count"]:
+        for s in sc["services"]:
+            if not s["healthy"]:
+                lines.append(f"    ⚠️  {s['name']:<50}  [UNHEALTHY]")
+
+    lines += [
+        "",
         f"  Report     : {report_path}",
         "",
     ]
@@ -100,7 +121,10 @@ def main() -> int:
     print("Running process monitor...", flush=True)
     process_result = run_process_monitor()
 
-    report = build_report(health_result, process_result)
+    print("Running service checker...", flush=True)
+    service_result = run_service_checks()
+
+    report = build_report(health_result, process_result, service_result)
     report_path = write_report(report)
     print_summary(report, report_path)
 
