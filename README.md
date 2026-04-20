@@ -18,15 +18,21 @@ Polls CPU, Memory, and Disk utilization on any Mac or Linux host. Compares live 
 it-automation-python/
 ├── core/
 │   ├── __init__.py
-│   └── system_health.py       # Business logic — metric collection + threshold evaluation
+│   ├── system_health.py       # Health logic — CPU, memory, disk checks
+│   └── process_monitor.py     # Process logic — top-N, zombies, threshold flags
 ├── scripts/
-│   └── run_health_check.py    # CLI entry point (argparse, JSON output, exit codes)
+│   ├── run_health_check.py    # CLI: system health check
+│   ├── run_process_monitor.py # CLI: process monitor
+│   └── run_all_checks.py      # CLI: combined runner + JSON report
 ├── tools/
 │   └── health_check.py        # Stdlib-only quick check (zero dependencies)
 ├── config/
-│   └── thresholds.json        # Alert thresholds — edit without touching code
+│   ├── thresholds.json        # Health check alert thresholds
+│   └── settings.py            # Process monitor constants
 ├── logs/
-│   └── health_check.log       # Auto-created on first run
+│   ├── health_check.log       # Auto-created on first run
+│   ├── process_monitor.log    # Auto-created on first run
+│   └── report_YYYY-MM-DD_HHMMSS.json  # Combined report per run
 ├── docs/
 │   └── runbook.md
 ├── requirements.txt
@@ -148,6 +154,79 @@ All runs append to `logs/health_check.log`:
 2026-04-20 14:32:11  INFO      Disk check — 48.7% used of 500.0GB at / (threshold 90%) [OK]
 2026-04-20 14:32:11  INFO      Health check complete — overall status: OK
 ```
+
+---
+
+## Process Monitor
+
+Lists the top CPU-consuming processes on the host, detects zombie processes, and flags any process exceeding the configured CPU threshold. Results log to `logs/process_monitor.log`.
+
+### Usage
+
+```bash
+# Standard table output (top 10)
+python scripts/run_process_monitor.py
+
+# Show top 20 processes
+python scripts/run_process_monitor.py --top 20
+
+# JSON output for pipeline consumption
+python scripts/run_process_monitor.py --json
+
+# Kill a process by PID (prompts for confirmation)
+python scripts/run_process_monitor.py --kill 1234
+```
+
+### Example Output
+
+```
+  Timestamp  : 2026-04-20 15:31:54
+  Overall    : OK
+  Threshold  : CPU > 50.0%
+  Zombies    : 0
+  Flagged    : 0
+
+  Top 10 Processes by CPU:
+  ------------------------------------------------------------------------
+  PID     NAME                            CPU%    MEM% STATUS       FLAG
+  ------------------------------------------------------------------------
+  18763   Code Helper (Renderer)           9.0     0.5 running
+  43238   Claude Helper (Renderer)         7.6     0.7 running
+  16100   Code Helper (GPU)                7.0     0.3 running
+  ------------------------------------------------------------------------
+```
+
+Adjust the CPU threshold in `config/settings.py`:
+
+```python
+PROCESS_CPU_THRESHOLD = 50.0   # % — flag any process exceeding this
+PROCESS_TOP_N         = 10     # default number of processes to display
+```
+
+---
+
+## Scheduled Runner
+
+Runs health check and process monitor in sequence, aggregates results, and writes a timestamped JSON report to `logs/`.
+
+```bash
+python scripts/run_all_checks.py
+```
+
+### Cron Integration
+
+```cron
+# Run every 15 minutes
+*/15 * * * * cd ~/Projects/Automation/it-automation-python && .venv/bin/python scripts/run_all_checks.py >> /tmp/automation.log 2>&1
+```
+
+### Report Format
+
+Each run writes `logs/report_YYYY-MM-DD_HHMMSS.json` containing:
+- Combined overall status
+- Full health check metrics
+- Full process list with flags
+- Zombie count and flagged process details
 
 ---
 
