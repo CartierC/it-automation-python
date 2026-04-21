@@ -1,6 +1,6 @@
 # IT Automation — Python
 
-Production-grade system health monitoring with configurable alert thresholds, structured logging, and machine-readable output. Built as a foundation for IT / Cloud / DevOps automation tooling.
+Operational Python automation project demonstrating health checks, service validation, structured logging, testing, and maintainable CLI-based tooling.
 
 **Author:** CartierC — Cloud Systems Architect
 
