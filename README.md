@@ -1,9 +1,16 @@
 # IT Automation — Python
 
-Operational Python automation project demonstrating health checks, service validation, structured logging, testing, and maintainable CLI-based tooling.
+Python-based IT automation toolkit built to demonstrate operational scripting, service validation, logging, health checks, and test-driven workflow discipline.
 
-**Author:** CartierC — Cloud Systems Architect
+## What This Project Covers
+- System health checks
+- Service validation logic
+- Structured logging
+- CLI-driven automation
+- Testing and maintainable project structure
 
+## Why This Matters
+This project shows practical Python use in IT and operations environments where reliability, observability, and repeatable execution are required.
 ---
 
 ## Quick Start
