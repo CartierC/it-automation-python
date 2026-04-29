@@ -1,0 +1,151 @@
+{
+  "generated_at": "2026-04-20 16:50:02",
+  "overall": "OK",
+  "health_check": {
+    "overall": "OK",
+    "hostname": "Carters-MacBook-Pro.local",
+    "platform": "Darwin 25.4.0",
+    "metrics": [
+      {
+        "name": "CPU Usage",
+        "value": 16.2,
+        "threshold": 85,
+        "unit": "%",
+        "status": "OK"
+      },
+      {
+        "name": "Memory",
+        "value": 57.0,
+        "threshold": 80,
+        "unit": "%",
+        "status": "OK"
+      },
+      {
+        "name": "Disk Usage",
+        "value": 0.7,
+        "threshold": 90,
+        "unit": "%",
+        "status": "OK"
+      }
+    ]
+  },
+  "process_monitor": {
+    "overall": "OK",
+    "cpu_threshold": 50.0,
+    "zombie_count": 0,
+    "flagged_count": 0,
+    "processes": [
+      {
+        "pid": 21673,
+        "name": "Python",
+        "cpu_percent": 7.2,
+        "mem_percent": 0.05,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 43238,
+        "name": "Claude Helper (Renderer)",
+        "cpu_percent": 5.8,
+        "mem_percent": 0.72,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 43208,
+        "name": "Claude Helper",
+        "cpu_percent": 3.6,
+        "mem_percent": 0.2,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 16103,
+        "name": "Code Helper (Renderer)",
+        "cpu_percent": 3.4,
+        "mem_percent": 1.08,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 16100,
+        "name": "Code Helper (GPU)",
+        "cpu_percent": 3.0,
+        "mem_percent": 0.28,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 18763,
+        "name": "Code Helper (Renderer)",
+        "cpu_percent": 2.7,
+        "mem_percent": 0.62,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 18574,
+        "name": "Code Helper (Plugin)",
+        "cpu_percent": 2.3,
+        "mem_percent": 1.23,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 89269,
+        "name": "Microsoft Word",
+        "cpu_percent": 1.2,
+        "mem_percent": 0.96,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 1606,
+        "name": "duetexpertd",
+        "cpu_percent": 1.1,
+        "mem_percent": 0.21,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 43310,
+        "name": "com.apple.Virtualization.VirtualMachine",
+        "cpu_percent": 1.0,
+        "mem_percent": 7.05,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      }
+    ]
+  },
+  "service_checker": {
+    "overall": "OK",
+    "target_count": 2,
+    "unhealthy_count": 0,
+    "services": [
+      {
+        "name": "com.apple.Finder",
+        "pid": "1678",
+        "exit_status": "0",
+        "is_target": true,
+        "healthy": true
+      },
+      {
+        "name": "com.apple.Safari.SafeBrowsing.Service",
+        "pid": "1742",
+        "exit_status": "0",
+        "is_target": true,
+        "healthy": true
+      }
+    ]
+  }
+}

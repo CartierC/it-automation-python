@@ -1,0 +1,54 @@
+$ python scripts/run_service_checker.py
+
+  Timestamp  : 2026-04-20 16:50:02
+  Overall    : OK
+  Targets    : 2
+  Unhealthy  : 0
+
+  Target Services:
+  ------------------------------------------------------------------------------------
+  SERVICE                                                  PID     EXIT HEALTHY  FLAG
+  ------------------------------------------------------------------------------------
+  com.apple.Finder                                        1678        0 True
+  com.apple.Safari.SafeBrowsing.Service                   1742        0 True
+  ------------------------------------------------------------------------------------
+
+---
+
+$ python scripts/run_service_checker.py --json
+{
+  "timestamp": "2026-04-20 16:50:02",
+  "overall": "OK",
+  "target_count": 2,
+  "unhealthy_count": 0,
+  "services": [
+    { "name": "com.apple.Finder", "pid": "1678", "exit_status": "0", "is_target": true, "healthy": true },
+    { "name": "com.apple.Safari.SafeBrowsing.Service", "pid": "1742", "exit_status": "0", "is_target": true, "healthy": true }
+  ]
+}
+
+---
+
+ALERT scenario (service not running — no PID):
+
+  Timestamp  : 2026-04-20 17:02:15
+  Overall    : ALERT
+  Targets    : 2
+  Unhealthy  : 1
+
+  Target Services:
+  ------------------------------------------------------------------------------------
+  SERVICE                                                  PID     EXIT HEALTHY  FLAG
+  ------------------------------------------------------------------------------------
+  com.apple.Finder                                        1678        0 True
+  com.apple.Safari.SafeBrowsing.Service                      -      N/A False    ⚠️  ALERT
+  ------------------------------------------------------------------------------------
+
+---
+
+Log output (logs/service_checker.log):
+
+2026-04-20 16:50:01  INFO      Starting service check — 2 target(s)
+2026-04-20 16:50:02  INFO      Service OK — com.apple.Finder (PID 1678)
+2026-04-20 16:50:02  INFO      Service OK — com.apple.Safari.SafeBrowsing.Service (PID 1742)
+2026-04-20 16:50:02  INFO      Service check complete — 2 targets, 0 unhealthy, overall: OK

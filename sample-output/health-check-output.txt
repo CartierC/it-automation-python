@@ -1,0 +1,55 @@
+$ python scripts/run_health_check.py
+
+  Host      : Carters-MacBook-Pro.local
+  Platform  : Darwin 25.4.0
+  Timestamp : 2026-04-20 16:50:02
+  Overall   : OK
+
+  Metrics:
+    ✓  CPU Usage      16.2%  (threshold: 85%)  [OK]
+    ✓  Memory         57.0%  (threshold: 80%)  [OK]
+    ✓  Disk Usage      0.7%  (threshold: 90%)  [OK]
+
+---
+
+$ python scripts/run_health_check.py --json
+{
+  "hostname": "Carters-MacBook-Pro.local",
+  "platform": "Darwin 25.4.0",
+  "timestamp": "2026-04-20 16:50:02",
+  "overall": "OK",
+  "metrics": [
+    { "name": "CPU Usage", "value": 16.2, "threshold": 85, "unit": "%", "status": "OK" },
+    { "name": "Memory",    "value": 57.0, "threshold": 80, "unit": "%", "status": "OK" },
+    { "name": "Disk Usage", "value": 0.7, "threshold": 90, "unit": "%", "status": "OK" }
+  ]
+}
+
+---
+
+$ python scripts/run_health_check.py --quiet
+OK
+
+---
+
+Log output (logs/health_check.log):
+
+2026-04-20 16:50:01  INFO      Starting health check on Carters-MacBook-Pro.local
+2026-04-20 16:50:02  INFO      CPU check — 16.2% (threshold 85%) [OK]
+2026-04-20 16:50:02  INFO      Memory check — 57.0% used of 48.0GB (threshold 80%) [OK]
+2026-04-20 16:50:02  INFO      Disk check — 0.7% used of 1858.1GB at / (threshold 90%) [OK]
+2026-04-20 16:50:02  INFO      Health check complete — overall status: OK
+
+---
+
+ALERT scenario (threshold breached):
+
+  Host      : Carters-MacBook-Pro.local
+  Platform  : Darwin 25.4.0
+  Timestamp : 2026-04-20 17:01:44
+  Overall   : ALERT
+
+  Metrics:
+    ⚠️  CPU Usage      91.3%  (threshold: 85%)  [ALERT]
+    ✓  Memory         57.0%  (threshold: 80%)  [OK]
+    ✓  Disk Usage      0.7%  (threshold: 90%)  [OK]

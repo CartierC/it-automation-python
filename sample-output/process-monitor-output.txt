@@ -1,0 +1,73 @@
+$ python scripts/run_process_monitor.py
+
+  Timestamp  : 2026-04-20 16:50:02
+  Overall    : OK
+  Threshold  : CPU > 50.0%
+  Zombies    : 0
+  Flagged    : 0
+
+  Top 10 Processes by CPU:
+  ------------------------------------------------------------------------
+  PID     NAME                         CPU%    MEM% STATUS       FLAG
+  ------------------------------------------------------------------------
+  21673   Python                        7.2     0.1 running
+  43238   Claude Helper (Renderer)      5.8     0.7 running
+  43208   Claude Helper                 3.6     0.2 running
+  16103   Code Helper (Renderer)        3.4     1.1 running
+  16100   Code Helper (GPU)             3.0     0.3 running
+  18763   Code Helper (Renderer)        2.7     0.6 running
+  18574   Code Helper (Plugin)          2.3     1.2 running
+  89269   Microsoft Word                1.2     1.0 running
+  1606    duetexpertd                   1.1     0.2 running
+  43310   com.apple.Virtualization.Virt 1.0     7.1 running
+  ------------------------------------------------------------------------
+
+---
+
+$ python scripts/run_process_monitor.py --top 5
+
+  Timestamp  : 2026-04-20 16:50:02
+  Overall    : OK
+  Threshold  : CPU > 50.0%
+  Zombies    : 0
+  Flagged    : 0
+
+  Top 5 Processes by CPU:
+  ------------------------------------------------------------------------
+  PID     NAME                         CPU%    MEM% STATUS       FLAG
+  ------------------------------------------------------------------------
+  21673   Python                        7.2     0.1 running
+  43238   Claude Helper (Renderer)      5.8     0.7 running
+  43208   Claude Helper                 3.6     0.2 running
+  16103   Code Helper (Renderer)        3.4     1.1 running
+  16100   Code Helper (GPU)             3.0     0.3 running
+  ------------------------------------------------------------------------
+
+---
+
+ALERT scenario (CPU threshold breach):
+
+  Timestamp  : 2026-04-20 16:55:10
+  Overall    : ALERT
+  Threshold  : CPU > 50.0%
+  Zombies    : 0
+  Flagged    : 1
+
+  Top 10 Processes by CPU:
+  ------------------------------------------------------------------------
+  PID     NAME                         CPU%    MEM% STATUS       FLAG
+  ------------------------------------------------------------------------
+  5821    runaway_job                  87.4     2.3 running      ⚠️  ALERT
+  21673   Python                        7.2     0.1 running
+  43238   Claude Helper (Renderer)      5.8     0.7 running
+  ------------------------------------------------------------------------
+
+---
+
+Log output (logs/process_monitor.log):
+
+2026-04-20 16:50:01  INFO      Starting process monitor — top 10, CPU threshold 50%
+2026-04-20 16:50:02  INFO      Process — PID 21673 (Python) CPU 7.2% MEM 0.1%
+2026-04-20 16:50:02  INFO      Process — PID 43238 (Claude Helper (Renderer)) CPU 5.8% MEM 0.7%
+2026-04-20 16:50:02  INFO      Process — PID 43208 (Claude Helper) CPU 3.6% MEM 0.2%
+2026-04-20 16:50:02  INFO      Process monitor complete — 10 processes, 0 flagged, overall: OK

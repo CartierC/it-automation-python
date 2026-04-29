@@ -1,0 +1,130 @@
+{
+  "generated_at": "2026-04-20 16:29:49",
+  "overall": "ALERT",
+  "health_check": {
+    "overall": "OK",
+    "hostname": "Carters-MacBook-Pro.local",
+    "platform": "Darwin 25.4.0",
+    "metrics": [
+      {
+        "name": "CPU Usage",
+        "value": 20.2,
+        "threshold": 85,
+        "unit": "%",
+        "status": "OK"
+      },
+      {
+        "name": "Memory",
+        "value": 56.1,
+        "threshold": 80,
+        "unit": "%",
+        "status": "OK"
+      },
+      {
+        "name": "Disk Usage",
+        "value": 0.7,
+        "threshold": 90,
+        "unit": "%",
+        "status": "OK"
+      }
+    ]
+  },
+  "process_monitor": {
+    "overall": "ALERT",
+    "cpu_threshold": 50.0,
+    "zombie_count": 0,
+    "flagged_count": 1,
+    "processes": [
+      {
+        "pid": 3121,
+        "name": "com.apple.WebKit.WebContent",
+        "cpu_percent": 100.0,
+        "mem_percent": 3.47,
+        "status": "running",
+        "flagged": true,
+        "is_zombie": false
+      },
+      {
+        "pid": 43238,
+        "name": "Claude Helper (Renderer)",
+        "cpu_percent": 7.3,
+        "mem_percent": 0.72,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 21238,
+        "name": "Python",
+        "cpu_percent": 7.1,
+        "mem_percent": 0.05,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 18763,
+        "name": "Code Helper (Renderer)",
+        "cpu_percent": 5.6,
+        "mem_percent": 0.52,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 16100,
+        "name": "Code Helper (GPU)",
+        "cpu_percent": 5.3,
+        "mem_percent": 0.27,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 43208,
+        "name": "Claude Helper",
+        "cpu_percent": 4.4,
+        "mem_percent": 0.2,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 16103,
+        "name": "Code Helper (Renderer)",
+        "cpu_percent": 3.2,
+        "mem_percent": 1.02,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 89269,
+        "name": "Microsoft Word",
+        "cpu_percent": 1.8,
+        "mem_percent": 0.97,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 18574,
+        "name": "Code Helper (Plugin)",
+        "cpu_percent": 1.1,
+        "mem_percent": 1.22,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 1713,
+        "name": "com.apple.WebKit.Networking",
+        "cpu_percent": 0.6,
+        "mem_percent": 0.34,
+        "status": "running",
+        "flagged": false,
+        "is_zombie": false
+      }
+    ]
+  }
+}

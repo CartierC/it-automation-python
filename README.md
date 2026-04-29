@@ -13,6 +13,48 @@ Python-based IT automation toolkit built to demonstrate operational scripting, s
 This project shows practical Python use in IT and operations environments where reliability, observability, and repeatable execution are required.
 ---
 
+## Target Roles
+
+This project is scoped to demonstrate practical readiness for:
+
+- **Automation Analyst** — Python scripting, modular architecture, config-driven logic, repeatable workflows
+- **Cloud Support Engineer** — JSON output for pipeline/Lambda consumption, exit-code–based alerting, cron integration
+- **IT Support Automation** — System health checks, service validation, process management, structured logging
+- **Technical Operations** — Threshold alerting, operational runbook, audit trail, Makefile-based tooling
+
+---
+
+## Skills Demonstrated
+
+| Skill | How It Appears |
+|---|---|
+| Python scripting | `core/` modules — dataclasses, argparse, logging, subprocess |
+| System health checks | CPU, memory, and disk polling with psutil |
+| Service validation | macOS launchd service health via `launchctl` |
+| Logging | Dual-handler (file + console) structured logging with timestamps |
+| Repeatable workflows | Makefile targets + cron-ready combined runner |
+| CLI automation | 4 argparse entry points with consistent `--json`, `--quiet`, `--all` flags |
+| Unit testing | 44 mocked pytest tests — boundary coverage, zero flakiness |
+| Operational reporting | Timestamped JSON report per run — audit trail for all checks |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Python 3.10+ |
+| System metrics | [psutil](https://psutil.readthedocs.io/) |
+| Service inspection | macOS `launchctl` (via `subprocess`) |
+| Testing | pytest + pytest-mock |
+| CLI | argparse |
+| Data modeling | dataclasses |
+| Logging | stdlib `logging` |
+| Automation | Makefile + cron |
+| CI | GitHub Actions |
+
+---
+
 ## Quick Start
 
 ```bash
@@ -109,6 +151,11 @@ python tools/health_check.py
 ---
 
 ## Example Output
+
+Full sample outputs are in [`sample-output/`](sample-output/):
+- [`health-check-output.txt`](sample-output/health-check-output.txt) — human-readable, JSON, and log output
+- [`process-monitor-output.txt`](sample-output/process-monitor-output.txt) — tabular process list with ALERT scenario
+- [`service-checker-output.txt`](sample-output/service-checker-output.txt) — service health table with unhealthy example
 
 ```
   Host      : macbook-pro.local
@@ -354,3 +401,30 @@ make help       # print this list
 | Aggregated reporting | Combined JSON report written per run — audit trail for all checks |
 
 This pattern scales directly to fleet-wide monitoring, Lambda health checks, Ansible playbook validation, and CI pipeline gates.
+
+---
+
+## Next Improvements
+
+- **Multi-host support** — extend the health check runner to accept a list of SSH targets and aggregate results across a fleet
+- **Slack / webhook alerting** — POST JSON payload to a Slack webhook or Datadog intake endpoint on any ALERT status
+- **Log rotation** — integrate Python's `RotatingFileHandler` to cap log file size and retain N rolling backups
+- **Linux service support** — add a `systemctl` backend to `service_checker.py` for parity with Linux hosts
+- **Scheduled reporting** — convert `run_all_checks.py` into a lightweight daemon with configurable poll intervals
+- **Metrics export** — emit Prometheus-compatible metrics (`/metrics` endpoint) for Grafana or CloudWatch integration
+
+---
+
+## Recruiter Note
+
+This repo is intentionally narrow in scope — every line of code maps directly to a task an Automation Analyst, IT Support Engineer, or Technical Operations hire would do on the job.
+
+It demonstrates:
+
+- **Production habits** — modular `core/` layout, config-driven thresholds, dual-handler logging, exit-code discipline
+- **Test coverage** — 44 unit tests with mocked psutil and subprocess; no real system calls, no flakiness
+- **Operational thinking** — a full [runbook](docs/runbook.md) with alert response procedures, config reference, and troubleshooting table
+- **CI readiness** — GitHub Actions workflow runs `pytest` and `compileall` on every push
+- **CLI fluency** — argparse across 4 entry points with `--json`, `--quiet`, `--all`, `--top`, `--kill` flags
+
+The codebase is runnable from a single `make all` and auditable from the JSON reports in `logs/`.
