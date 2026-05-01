@@ -1,0 +1,119 @@
+TIER 3 OBSERVABILITY REPORT
+Host: Carters-MacBook-Pro.local
+Date: 2026-05-01
+Branch: feature/tier-3-observability
+====================================================================
+
+
+────────────────────────────────────────────────────────────────────
+SECTION 1 — HEALTH CHECK (structured log output)
+────────────────────────────────────────────────────────────────────
+
+$ python tools/health_check.py
+Host     : Carters-MacBook-Pro.local
+OS       : Darwin 25.4.0
+CPU      : 18 logical cores
+Disk     : 150GB used / 1858GB total
+Status   : Operational
+
+Structured log written to logs/health_check.log:
+
+2026-05-01 01:18:09 | INFO     | tools.health_check | event=start host=Carters-MacBook-Pro.local timestamp=2026-05-01 01:18:09
+2026-05-01 01:18:09 | INFO     | tools.health_check | check=cpu status=OK value=18 unit=cores
+2026-05-01 01:18:09 | INFO     | tools.health_check | check=disk status=OK value=8.1 unit=pct used=150GB total=1858GB
+2026-05-01 01:18:09 | INFO     | tools.health_check | event=complete overall=OK
+
+Log format: timestamp | level | component | key=value pairs (logfmt)
+
+
+────────────────────────────────────────────────────────────────────
+SECTION 2 — FAILURE SIMULATION
+────────────────────────────────────────────────────────────────────
+
+$ python tools/failure_simulator.py
+
+  ┌──────────────────────────────────────────────────────┐
+  │           FAILURE SIMULATION REPORT                  │
+  └──────────────────────────────────────────────────────┘
+  Timestamp : 2026-05-01 01:18:18
+  Scenarios : 3
+  Alerts    : 3 / 3
+
+  ------------------------------------------------------------
+  [1] DISK THRESHOLD EXCEEDED
+       Status  : ⚠️  ALERT
+       Message : Simulated disk usage 94.3% exceeds threshold 90%
+  ------------------------------------------------------------
+  [2] MISSING SERVICE
+       Status  : ⚠️  ALERT
+       Message : Service 'com.example.CriticalDaemon' not found in launchctl output — no PID assigned, health=False
+  ------------------------------------------------------------
+  [3] CONFIG VALIDATION FAILURE
+       Status  : ⚠️  ALERT
+       Message : Config missing required keys: ['disk_percent', 'memory_percent']
+  ------------------------------------------------------------
+
+  Log written to: /path/to/logs/failure_simulator.log
+
+
+Structured log written to logs/failure_simulator.log:
+
+2026-05-01 01:18:18 | INFO     | tools.failure_simulator | event=start message='running all failure simulation scenarios'
+2026-05-01 01:18:18 | WARNING  | tools.failure_simulator | check=disk_usage status=ALERT simulated=94.3% threshold=90%
+2026-05-01 01:18:18 | WARNING  | tools.failure_simulator | check=service_health status=ALERT service=com.example.CriticalDaemon pid=-
+2026-05-01 01:18:18 | ERROR    | tools.failure_simulator | check=config_validation status=ALERT missing_keys=['disk_percent', 'memory_percent']
+2026-05-01 01:18:18 | INFO     | tools.failure_simulator | event=complete scenarios=3 alerts=3
+
+Log levels used: INFO (lifecycle), WARNING (threshold + service failures), ERROR (config failures)
+Each log entry is structured key=value (logfmt) — parseable by Datadog, Splunk, Loki, or jq.
+
+
+────────────────────────────────────────────────────────────────────
+SECTION 3 — WHAT EACH SCENARIO PROVES
+────────────────────────────────────────────────────────────────────
+
+[1] disk_threshold_exceeded
+    Demonstrates: threshold comparison logic, ALERT escalation path,
+    config-driven threshold values read from thresholds.json.
+    SRE relevance: mimics a production disk-full alert before it reaches 100%.
+
+[2] missing_service
+    Demonstrates: service health model (PID presence = healthy),
+    ALERT on absent launchd service, structured service entry format.
+    SRE relevance: simulates what happens when a daemon crashes or never started.
+
+[3] config_validation_failure
+    Demonstrates: defensive config loading, missing key detection,
+    ERROR-level logging for configuration problems.
+    SRE relevance: catches operator error before a bad config reaches production.
+
+
+────────────────────────────────────────────────────────────────────
+SECTION 4 — TEST COVERAGE
+────────────────────────────────────────────────────────────────────
+
+$ pytest tests/ -v --disable-warnings -q
+
+  tests/test_failure_simulator.py — 21 tests covering all 3 scenarios
+  tests/test_config_validation.py — 16 tests covering thresholds.json and settings.py
+  tests/test_health_check.py      — 17 tests (existing, psutil mocked)
+  tests/test_process_monitor.py   — 16 tests (existing)
+  tests/test_service_checker.py   — 11 tests (existing)
+
+  Total: 81 passed
+
+
+────────────────────────────────────────────────────────────────────
+SECTION 5 — WHERE LOGS ARE STORED
+────────────────────────────────────────────────────────────────────
+
+logs/
+├── health_check.log        — structured logs from tools/health_check.py
+│                             and scripts/run_health_check.py (both append)
+├── failure_simulator.log   — structured logs from tools/failure_simulator.py
+├── process_monitor.log     — logs from scripts/run_process_monitor.py
+├── service_checker.log     — logs from scripts/run_service_checker.py
+└── report_YYYY-MM-DD.json  — combined JSON report per full run
+
+All log files are excluded from git (logs/*.log in .gitignore).
+Directories tracked via logs/.gitkeep.

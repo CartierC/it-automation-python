@@ -450,3 +450,86 @@ Status   : Operational
 ```
 
 Full output samples (human-readable, JSON, ALERT scenarios, and log output) are in [`sample-output/`](sample-output/).
+
+---
+
+## Tier 3 Observability Upgrade
+
+Branch: `feature/tier-3-observability`
+
+### What Was Added
+
+| Component | What It Does |
+|---|---|
+| **Structured logging** — `tools/health_check.py` | Writes logfmt-style entries to `logs/health_check.log` with `timestamp \| level \| component \| key=value` format |
+| **Failure simulator** — `tools/failure_simulator.py` | Simulates 3 operational failure scenarios without touching real system state |
+| **Observability report** — `sample-output/observability_report.txt` | Real output captured from both tools including terminal report and log file content |
+| **Config validation tests** — `tests/test_config_validation.py` | 16 tests verifying `thresholds.json` and `settings.py` have correct keys, types, and sane values |
+| **Failure simulator tests** — `tests/test_failure_simulator.py` | 21 tests covering each scenario's return structure, status, and correctness |
+
+### How to Run the Health Check
+
+```bash
+# Human-readable terminal output + structured log written to logs/health_check.log
+python tools/health_check.py
+
+# Full-featured version with psutil, thresholds, JSON output, and exit codes
+python scripts/run_health_check.py
+python scripts/run_health_check.py --json
+python scripts/run_health_check.py --quiet   # exits 0=OK, 1=ALERT
+```
+
+### How to Run Failure Simulation
+
+```bash
+# Simulates 3 ALERT scenarios; prints report + writes to logs/failure_simulator.log
+python tools/failure_simulator.py
+```
+
+Three scenarios are simulated on every run:
+
+| # | Scenario | What It Detects |
+|---|---|---|
+| 1 | `disk_threshold_exceeded` | Disk usage above configured % threshold |
+| 2 | `missing_service` | Required launchd service has no PID (not running) |
+| 3 | `config_validation_failure` | thresholds config is missing required keys |
+
+All scenarios exit with **ALERT** by design — this proves the detection logic fires correctly.
+
+### Where Logs Are Stored
+
+```
+logs/
+├── health_check.log        # structured logfmt entries from health check tools
+├── failure_simulator.log   # WARNING/ERROR entries from each simulated failure
+├── process_monitor.log     # logs from scripts/run_process_monitor.py
+├── service_checker.log     # logs from scripts/run_service_checker.py
+└── report_YYYY-MM-DD.json  # combined JSON report per full run
+```
+
+Log format (logfmt — compatible with Datadog, Loki, Splunk):
+```
+2026-05-01 01:18:18 | WARNING  | tools.failure_simulator | check=disk_usage status=ALERT simulated=94.3% threshold=90%
+2026-05-01 01:18:18 | ERROR    | tools.failure_simulator | check=config_validation status=ALERT missing_keys=['disk_percent', 'memory_percent']
+```
+
+### Where Sample Evidence Is Stored
+
+```
+sample-output/
+├── observability_report.txt    # full Tier 3 evidence: terminal output + log content
+├── health-check-output.txt     # health check — human, JSON, ALERT, log
+├── process-monitor-output.txt  # process monitor — table + ALERT scenario
+└── service-checker-output.txt  # service checker — table + ALERT scenario
+```
+
+### Why This Matters for SRE / Cloud Support / Technical Operations
+
+| Capability | SRE / Ops Signal |
+|---|---|
+| Structured logfmt output | Log entries are machine-parseable — ready for Datadog, Loki, or CloudWatch Logs Insights |
+| Failure simulation | Shows ability to test alerting paths without needing a real production incident |
+| Config validation | Defensive coding — catches misconfiguration before it reaches a live system |
+| Exit code discipline | All scripts exit 0 (OK) or 1 (ALERT) — integrates cleanly with PagerDuty, cron, and CI gates |
+| Audit trail | Every run appends to structured log files — supports post-incident review |
+| 81 mocked unit tests | No real system calls in tests — CI passes on any platform without live infrastructure |
