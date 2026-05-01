@@ -1,19 +1,18 @@
 # core/process_monitor.py
 import logging
-import os
 import signal
+import sys
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import psutil
 
 _ROOT = Path(__file__).resolve().parents[1]
-
-import sys
 sys.path.insert(0, str(_ROOT))
-from config.settings import PROCESS_CPU_THRESHOLD, PROCESS_TOP_N, PROCESS_LOG_PATH
+
+from config.settings import PROCESS_CPU_THRESHOLD, PROCESS_LOG_PATH, PROCESS_TOP_N  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -122,7 +121,6 @@ def get_top_processes(top_n: int = PROCESS_TOP_N) -> list[ProcessEntry]:
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
 
-    import time
     time.sleep(0.5)
 
     raw = _collect_processes()
@@ -171,7 +169,9 @@ def kill_process(pid: int) -> bool:
 
 
 def run_process_monitor(top_n: int = PROCESS_TOP_N) -> ProcessMonitorResult:
-    logger.info("Starting process monitor — top %d, CPU threshold %.0f%%", top_n, PROCESS_CPU_THRESHOLD)
+    logger.info(
+        "Starting process monitor — top %d, CPU threshold %.0f%%", top_n, PROCESS_CPU_THRESHOLD
+    )
     processes = get_top_processes(top_n)
     result = ProcessMonitorResult(
         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 100
+# E402: module-level import not at top of file — suppressed project-wide because all
+# scripts and core modules use sys.path.insert() before importing local packages.
+# This is the standard pattern for standalone scripts that aren't installed as packages.
+extend-ignore = E402
+exclude =
+    .venv,
+    .git,
+    __pycache__,
+    .pytest_cache,
+    logs,
+    sample-output

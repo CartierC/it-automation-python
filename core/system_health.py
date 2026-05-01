@@ -42,7 +42,10 @@ class MetricResult:
 
     def __str__(self) -> str:
         flag = "⚠️ " if self.status == "ALERT" else "✓  "
-        return f"{flag}{self.name:<12} {self.value:>6.1f}{self.unit}  (threshold: {self.threshold}{self.unit})  [{self.status}]"
+        return (
+            f"{flag}{self.name:<12} {self.value:>6.1f}{self.unit}"
+            f"  (threshold: {self.threshold}{self.unit})  [{self.status}]"
+        )
 
 
 @dataclass

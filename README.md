@@ -94,14 +94,20 @@ it-automation-python/
 │   └── health_check.py        # Stdlib-only quick check (zero dependencies)
 ├── config/
 │   ├── thresholds.json        # Health check alert thresholds
-│   └── settings.py            # Process + service constants + test mock values
+│   ├── settings.py            # Process + service constants + test mock values
+│   └── settings.example.py    # Fully documented parameter reference
 ├── logs/
 │   ├── health_check.log       # Auto-created on first run
 │   ├── process_monitor.log    # Auto-created on first run
 │   ├── service_checker.log    # Auto-created on first run
 │   └── report_YYYY-MM-DD_HHMMSS.json  # Combined report per run
 ├── docs/
-│   └── runbook.md
+│   ├── runbook.md                 # Operations runbook — alert response, config ref, troubleshooting
+│   ├── automation-overview.md     # Component map, data flow, execution model
+│   ├── system-health-monitoring.md# psutil internals, sampling strategy, threshold logic
+│   ├── threat-model.md            # What failure states are detected and what is out of scope
+│   ├── verification-checklist.md  # Step-by-step verification with pass/fail criteria
+│   └── verification-output.md     # Real terminal output from a completed run
 ├── Makefile                   # make install | health | processes | services | all | test | clean
 ├── requirements.txt
 └── .gitignore
@@ -399,6 +405,7 @@ make help       # print this list
 | subprocess automation | `launchctl` parsing with graceful error handling for non-zero exits |
 | Makefile ops | Single-command install, run, test, and clean — no manual venv activation |
 | Aggregated reporting | Combined JSON report written per run — audit trail for all checks |
+| Operational documentation | Threat model, verification checklist, runbook, and system-health deep-dive in `docs/` |
 
 This pattern scales directly to fleet-wide monitoring, Lambda health checks, Ansible playbook validation, and CI pipeline gates.
 

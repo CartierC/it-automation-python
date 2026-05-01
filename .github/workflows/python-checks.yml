@@ -7,13 +7,13 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  lint-test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -21,15 +21,24 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt
+
+      - name: Verify required files exist
+        run: |
+          for f in README.md requirements.txt core/system_health.py core/process_monitor.py core/service_checker.py; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING required file: $f"
+              exit 1
+            fi
+          done
+          echo "All required files present."
+
+      - name: Lint with flake8
+        run: |
+          flake8 core/ scripts/ tests/ tools/ config/ --statistics
 
       - name: Syntax check (compileall)
-        run: python -m compileall . -q
+        run: python -m compileall core/ scripts/ tests/ tools/ config/ -q
 
       - name: Run tests
-        run: |
-          if [ -d tests ]; then
-            python -m pytest tests/ -v
-          else
-            echo "No tests/ directory found — skipping pytest"
-          fi
+        run: pytest tests/ -v

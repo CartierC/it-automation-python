@@ -1,15 +1,15 @@
 # core/service_checker.py
 import logging
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[1]
-
-import sys
 sys.path.insert(0, str(_ROOT))
-from config.settings import TARGET_SERVICES, SERVICE_LOG_PATH
+
+from config.settings import SERVICE_LOG_PATH, TARGET_SERVICES  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -146,7 +146,9 @@ def run_service_checks(target_services: list[str] = TARGET_SERVICES) -> ServiceC
             if s.healthy:
                 logger.info("Service OK — %s (PID %s)", s.name, s.pid)
             else:
-                logger.warning("Service UNHEALTHY — %s (PID %s, exit %s)", s.name, s.pid, s.exit_status)
+                logger.warning(
+                    "Service UNHEALTHY — %s (PID %s, exit %s)", s.name, s.pid, s.exit_status
+                )
 
     result = ServiceCheckResult(
         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
