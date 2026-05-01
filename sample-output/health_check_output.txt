@@ -1,0 +1,6 @@
+$ python tools/health_check.py
+Host     : Carters-MacBook-Pro.local
+OS       : Darwin 25.4.0
+CPU      : 18 logical cores
+Disk     : 150GB used / 1858GB total
+Status   : Operational

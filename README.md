@@ -435,3 +435,18 @@ It demonstrates:
 - **CLI fluency** — argparse across 4 entry points with `--json`, `--quiet`, `--all`, `--top`, `--kill` flags
 
 The codebase is runnable from a single `make all` and auditable from the JSON reports in `logs/`.
+
+---
+
+## Example Output
+
+```bash
+$ python tools/health_check.py
+Host     : Carters-MacBook-Pro.local
+OS       : Darwin 25.4.0
+CPU      : 18 logical cores
+Disk     : 150GB used / 1858GB total
+Status   : Operational
+```
+
+Full output samples (human-readable, JSON, ALERT scenarios, and log output) are in [`sample-output/`](sample-output/).
