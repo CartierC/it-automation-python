@@ -1,0 +1,155 @@
+{
+  "generated_at": "2026-05-20 11:27:26",
+  "overall": "WARNING",
+  "exit_code": 1,
+  "health_check": {
+    "overall": "OK",
+    "hostname": "vm",
+    "platform": "Linux 6.18.5",
+    "metrics": [
+      {
+        "name": "CPU Usage",
+        "value": 0.5,
+        "warn_threshold": 80,
+        "crit_threshold": 95,
+        "unit": "%",
+        "status": "OK"
+      },
+      {
+        "name": "Memory",
+        "value": 3.3,
+        "warn_threshold": 80,
+        "crit_threshold": 95,
+        "unit": "%",
+        "status": "OK"
+      },
+      {
+        "name": "Disk Usage",
+        "value": 19.1,
+        "warn_threshold": 85,
+        "crit_threshold": 95,
+        "unit": "%",
+        "status": "OK"
+      }
+    ]
+  },
+  "process_monitor": {
+    "overall": "OK",
+    "cpu_threshold": 50.0,
+    "zombie_count": 0,
+    "flagged_count": 0,
+    "processes": [
+      {
+        "pid": 1,
+        "name": "process_api",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.03,
+        "status": "sleeping",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 2,
+        "name": "kthreadd",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "sleeping",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 3,
+        "name": "pool_workqueue_release",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "sleeping",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 4,
+        "name": "kworker/R-rcu_gp",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "idle",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 5,
+        "name": "kworker/R-sync_wq",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "idle",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 6,
+        "name": "kworker/R-kvfree_rcu_reclaim",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "idle",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 7,
+        "name": "kworker/R-slub_flushwq",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "idle",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 8,
+        "name": "kworker/R-netns",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "idle",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 9,
+        "name": "kworker/0:0-events",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "idle",
+        "flagged": false,
+        "is_zombie": false
+      },
+      {
+        "pid": 10,
+        "name": "kworker/0:0H-kblockd",
+        "cpu_percent": 0.0,
+        "mem_percent": 0.0,
+        "status": "idle",
+        "flagged": false,
+        "is_zombie": false
+      }
+    ]
+  },
+  "service_checker": {
+    "overall": "ALERT",
+    "target_count": 2,
+    "unhealthy_count": 2,
+    "services": [
+      {
+        "name": "com.apple.Finder",
+        "pid": "-",
+        "exit_status": "N/A",
+        "is_target": true,
+        "healthy": false
+      },
+      {
+        "name": "com.apple.Safari.SafeBrowsing.Service",
+        "pid": "-",
+        "exit_status": "N/A",
+        "is_target": true,
+        "healthy": false
+      }
+    ]
+  }
+}
