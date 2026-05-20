@@ -1,5 +1,8 @@
 {
-  "cpu_percent": 85,
-  "memory_percent": 80,
-  "disk_percent": 90
+  "cpu_warn": 80,
+  "cpu_crit": 95,
+  "memory_warn": 80,
+  "memory_crit": 95,
+  "disk_warn": 85,
+  "disk_crit": 95
 }

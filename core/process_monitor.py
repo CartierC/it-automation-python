@@ -16,7 +16,7 @@ from config.settings import PROCESS_CPU_THRESHOLD, PROCESS_LOG_PATH, PROCESS_TOP
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    format="[%(asctime)s] [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
         logging.FileHandler(PROCESS_LOG_PATH),
@@ -140,15 +140,20 @@ def get_top_processes(top_n: int = PROCESS_TOP_N) -> list[ProcessEntry]:
 
     for entry in entries:
         if entry.is_zombie:
-            logger.warning("Zombie process detected — PID %d (%s)", entry.pid, entry.name)
+            logger.warning(
+                "PROCESS STATUS: WARNING | pid=%d name=%s reason=zombie",
+                entry.pid, entry.name,
+            )
         elif entry.flagged:
             logger.warning(
-                "CPU threshold breach — PID %d (%s) at %.1f%% (threshold %.0f%%)",
+                "PROCESS STATUS: WARNING | pid=%d name=%s cpu=%.1f%% threshold=%.0f%%",
                 entry.pid, entry.name, entry.cpu_percent, PROCESS_CPU_THRESHOLD,
             )
         else:
-            logger.info("Process — PID %d (%s) CPU %.1f%% MEM %.1f%%",
-                        entry.pid, entry.name, entry.cpu_percent, entry.mem_percent)
+            logger.info(
+                "PROCESS STATUS: OK | pid=%d name=%s cpu=%.1f%% mem=%.1f%%",
+                entry.pid, entry.name, entry.cpu_percent, entry.mem_percent,
+            )
 
     return entries
 
@@ -170,7 +175,7 @@ def kill_process(pid: int) -> bool:
 
 def run_process_monitor(top_n: int = PROCESS_TOP_N) -> ProcessMonitorResult:
     logger.info(
-        "Starting process monitor — top %d, CPU threshold %.0f%%", top_n, PROCESS_CPU_THRESHOLD
+        "PROCESS MONITOR: STARTING | top_n=%d cpu_threshold=%.0f%%", top_n, PROCESS_CPU_THRESHOLD
     )
     processes = get_top_processes(top_n)
     result = ProcessMonitorResult(
@@ -180,7 +185,7 @@ def run_process_monitor(top_n: int = PROCESS_TOP_N) -> ProcessMonitorResult:
         processes=processes,
     )
     logger.info(
-        "Process monitor complete — %d processes, %d flagged, overall: %s",
+        "PROCESS MONITOR: COMPLETE | processes=%d flagged=%d overall=%s",
         len(processes), len(result.flagged), result.overall,
     )
     return result

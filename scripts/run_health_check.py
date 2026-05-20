@@ -51,7 +51,8 @@ def main() -> int:
                 {
                     "name": m.name,
                     "value": m.value,
-                    "threshold": m.threshold,
+                    "warn_threshold": m.warn_threshold,
+                    "crit_threshold": m.crit_threshold,
                     "unit": m.unit,
                     "status": m.status,
                 }
@@ -62,6 +63,8 @@ def main() -> int:
     else:
         print(result.summary())
 
+    if result.overall == "CRITICAL":
+        return 2
     return 0 if result.overall == "OK" else 1
 
 

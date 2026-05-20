@@ -1,23 +1,44 @@
 #!/usr/bin/env python3
-# scripts/run_all_checks.py
 import json
+import logging
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from config.settings import LOG_DIR
-from core.process_monitor import run_process_monitor
-from core.service_checker import run_service_checks
-from core.system_health import run_health_check
+# Configure root logger before core module imports so format is consistent
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
+
+from config.settings import LOG_DIR  # noqa: E402
+from core.process_monitor import run_process_monitor  # noqa: E402
+from core.service_checker import run_service_checks  # noqa: E402
+from core.system_health import run_health_check  # noqa: E402
 
 
-def build_report(health_result, process_result, service_result) -> dict:
-    statuses = (health_result.overall, process_result.overall, service_result.overall)
+def _compute_exit_code(health_result, process_result, service_result) -> int:
+    if health_result.overall == "CRITICAL":
+        return 2
+    if any(s in ("WARNING", "ALERT") for s in [
+        health_result.overall, process_result.overall, service_result.overall
+    ]):
+        return 1
+    return 0
+
+
+def build_report(health_result, process_result, service_result, exit_code: int) -> dict:
+    overall = {2: "CRITICAL", 1: "WARNING", 0: "OK"}[exit_code]
     return {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "overall": "ALERT" if "ALERT" in statuses else "OK",
+        "overall": overall,
+        "exit_code": exit_code,
         "health_check": {
             "overall": health_result.overall,
             "hostname": health_result.hostname,
@@ -26,7 +47,8 @@ def build_report(health_result, process_result, service_result) -> dict:
                 {
                     "name": m.name,
                     "value": m.value,
-                    "threshold": m.threshold,
+                    "warn_threshold": m.warn_threshold,
+                    "crit_threshold": m.crit_threshold,
                     "unit": m.unit,
                     "status": m.status,
                 }
@@ -56,79 +78,78 @@ def write_report(report: dict) -> Path:
     return path
 
 
-def print_summary(report: dict, report_path: Path) -> None:
+def log_summary(report: dict, report_path: Path, duration: float) -> None:
     hc = report["health_check"]
     pm = report["process_monitor"]
     sc = report["service_checker"]
-    overall = report["overall"]
-    flag = "⚠️  ALERT" if overall == "ALERT" else "✓  OK"
+    exit_code = report["exit_code"]
 
-    lines = [
-        "",
-        "  ┌─────────────────────────────────────────┐",
-        "  │         COMBINED AUTOMATION REPORT       │",
-        "  └─────────────────────────────────────────┘",
-        "",
-        f"  Generated  : {report['generated_at']}",
-        f"  Overall    : {flag}",
-        "",
-        "  ── Health Check ──────────────────────────",
-        f"  Host       : {hc['hostname']}",
-        f"  Platform   : {hc['platform']}",
-        f"  Status     : {hc['overall']}",
-    ]
+    logger.info("=== COMBINED AUTOMATION REPORT ===")
+    logger.info(
+        "generated_at=%s | overall=%s | exit_code=%d",
+        report["generated_at"], report["overall"], exit_code,
+    )
+
+    hc_level = (
+        logging.CRITICAL if hc["overall"] == "CRITICAL"
+        else logging.WARNING if hc["overall"] == "WARNING"
+        else logging.INFO
+    )
+    logger.log(
+        hc_level,
+        "HEALTH CHECK | host=%s platform=%s | overall=%s",
+        hc["hostname"], hc["platform"], hc["overall"],
+    )
     for m in hc["metrics"]:
-        icon = "⚠️ " if m["status"] == "ALERT" else "✓ "
-        lines.append(f"    {icon} {m['name']:<12} {m['value']:>6.1f}%  [{m['status']}]")
+        m_level = (
+            logging.CRITICAL if m["status"] == "CRITICAL"
+            else logging.WARNING if m["status"] == "WARNING"
+            else logging.INFO
+        )
+        logger.log(
+            m_level,
+            "%s STATUS: %s | usage=%.1f%%",
+            m["name"].upper(), m["status"], m["value"],
+        )
 
-    lines += [
-        "",
-        "  ── Process Monitor ───────────────────────",
-        f"  Status     : {pm['overall']}",
-        f"  Zombies    : {pm['zombie_count']}",
-        f"  Flagged    : {pm['flagged_count']}",
-    ]
-    if pm["flagged_count"]:
-        for p in pm["processes"]:
-            if p["flagged"]:
-                reason = "ZOMBIE" if p["is_zombie"] else f"CPU {p['cpu_percent']}%"
-                lines.append(f"    ⚠️  PID {p['pid']:>6}  {p['name']:<25}  {reason}")
+    pm_level = logging.WARNING if pm["overall"] != "OK" else logging.INFO
+    logger.log(
+        pm_level,
+        "PROCESS MONITOR | processes=%d zombies=%d flagged=%d | overall=%s",
+        len(pm["processes"]), pm["zombie_count"], pm["flagged_count"], pm["overall"],
+    )
 
-    lines += [
-        "",
-        "  ── Service Checker ───────────────────────",
-        f"  Status     : {sc['overall']}",
-        f"  Targets    : {sc['target_count']}",
-        f"  Unhealthy  : {sc['unhealthy_count']}",
-    ]
-    if sc["unhealthy_count"]:
-        for s in sc["services"]:
-            if not s["healthy"]:
-                lines.append(f"    ⚠️  {s['name']:<50}  [UNHEALTHY]")
+    sc_level = logging.WARNING if sc["overall"] != "OK" else logging.INFO
+    logger.log(
+        sc_level,
+        "SERVICE CHECKER | targets=%d unhealthy=%d | overall=%s",
+        sc["target_count"], sc["unhealthy_count"], sc["overall"],
+    )
 
-    lines += [
-        "",
-        f"  Report     : {report_path}",
-        "",
-    ]
-    print("\n".join(lines))
+    logger.info(
+        "report=%s | duration=%.2fs | exit_code=%d",
+        report_path, duration, exit_code,
+    )
 
 
 def main() -> int:
-    print("Running health check...", flush=True)
+    t_start = time.perf_counter()
+
     health_result = run_health_check()
-
-    print("Running process monitor...", flush=True)
     process_result = run_process_monitor()
-
-    print("Running service checker...", flush=True)
     service_result = run_service_checks()
 
-    report = build_report(health_result, process_result, service_result)
+    exit_code = _compute_exit_code(health_result, process_result, service_result)
+    report = build_report(health_result, process_result, service_result, exit_code)
     report_path = write_report(report)
-    print_summary(report, report_path)
 
-    return 0 if report["overall"] == "OK" else 1
+    duration = time.perf_counter() - t_start
+    log_summary(report, report_path, duration)
+
+    level = logging.CRITICAL if exit_code == 2 else (logging.WARNING if exit_code == 1 else logging.INFO)
+    logger.log(level, "Health check completed | exit_code=%d duration=%.2fs", exit_code, duration)
+
+    return exit_code
 
 
 if __name__ == "__main__":

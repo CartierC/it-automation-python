@@ -1,0 +1,34 @@
+[2026-05-20 11:27:24] [INFO] HEALTH CHECK: STARTING | host=vm
+[2026-05-20 11:27:25] [INFO] CPU STATUS: OK | usage=0.5%
+[2026-05-20 11:27:25] [INFO] MEMORY STATUS: OK | usage=3.3% available=15.4GB
+[2026-05-20 11:27:25] [INFO] DISK STATUS: OK | usage=19.1% mount=/
+[2026-05-20 11:27:25] [INFO] HEALTH CHECK: COMPLETE | overall=OK
+[2026-05-20 11:27:25] [INFO] PROCESS MONITOR: STARTING | top_n=10 cpu_threshold=50%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=1 name=process_api cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=2 name=kthreadd cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=3 name=pool_workqueue_release cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=4 name=kworker/R-rcu_gp cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=5 name=kworker/R-sync_wq cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=6 name=kworker/R-kvfree_rcu_reclaim cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=7 name=kworker/R-slub_flushwq cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=8 name=kworker/R-netns cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=9 name=kworker/0:0-events cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS STATUS: OK | pid=10 name=kworker/0:0H-kblockd cpu=0.0% mem=0.0%
+[2026-05-20 11:27:26] [INFO] PROCESS MONITOR: COMPLETE | processes=10 flagged=0 overall=OK
+[2026-05-20 11:27:26] [INFO] SERVICE CHECKER: STARTING | targets=2
+[2026-05-20 11:27:26] [ERROR] SERVICE CHECKER: ERROR | reason=launchctl_not_found platform=non-macOS
+[2026-05-20 11:27:26] [WARNING] SERVICE STATUS: WARNING | name=com.apple.Finder reason=not_found_in_launchctl
+[2026-05-20 11:27:26] [WARNING] SERVICE STATUS: WARNING | name=com.apple.Safari.SafeBrowsing.Service reason=not_found_in_launchctl
+[2026-05-20 11:27:26] [WARNING] SERVICE STATUS: WARNING | name=com.apple.Finder pid=- exit=N/A
+[2026-05-20 11:27:26] [WARNING] SERVICE STATUS: WARNING | name=com.apple.Safari.SafeBrowsing.Service pid=- exit=N/A
+[2026-05-20 11:27:26] [INFO] SERVICE CHECKER: COMPLETE | targets=2 unhealthy=2 overall=ALERT
+[2026-05-20 11:27:26] [INFO] === COMBINED AUTOMATION REPORT ===
+[2026-05-20 11:27:26] [INFO] generated_at=2026-05-20 11:27:26 | overall=WARNING | exit_code=1
+[2026-05-20 11:27:26] [INFO] HEALTH CHECK | host=vm platform=Linux 6.18.5 | overall=OK
+[2026-05-20 11:27:26] [INFO] CPU USAGE STATUS: OK | usage=0.5%
+[2026-05-20 11:27:26] [INFO] MEMORY STATUS: OK | usage=3.3%
+[2026-05-20 11:27:26] [INFO] DISK USAGE STATUS: OK | usage=19.1%
+[2026-05-20 11:27:26] [INFO] PROCESS MONITOR | processes=10 zombies=0 flagged=0 | overall=OK
+[2026-05-20 11:27:26] [WARNING] SERVICE CHECKER | targets=2 unhealthy=2 | overall=ALERT
+[2026-05-20 11:27:26] [INFO] report=/home/user/it-automation-python/logs/report_2026-05-20_112726.json | duration=1.52s | exit_code=1
+[2026-05-20 11:27:26] [WARNING] Health check completed | exit_code=1 duration=1.52s

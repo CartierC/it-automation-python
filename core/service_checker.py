@@ -13,7 +13,7 @@ from config.settings import SERVICE_LOG_PATH, TARGET_SERVICES  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    format="[%(asctime)s] [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
         logging.FileHandler(SERVICE_LOG_PATH),
@@ -116,12 +116,12 @@ def _inject_missing_targets(
                 exit_status="N/A",
                 is_target=True,
             ))
-            logger.warning("Target service not found in launchctl output: %s", name)
+            logger.warning("SERVICE STATUS: WARNING | name=%s reason=not_found_in_launchctl", name)
     return entries
 
 
 def run_service_checks(target_services: list[str] = TARGET_SERVICES) -> ServiceCheckResult:
-    logger.info("Starting service check — %d target(s)", len(target_services))
+    logger.info("SERVICE CHECKER: STARTING | targets=%d", len(target_services))
 
     try:
         proc = subprocess.run(
@@ -132,10 +132,10 @@ def run_service_checks(target_services: list[str] = TARGET_SERVICES) -> ServiceC
         )
         raw_output = proc.stdout
     except subprocess.CalledProcessError as exc:
-        logger.error("launchctl failed (exit %d): %s", exc.returncode, exc.stderr)
+        logger.error("SERVICE CHECKER: ERROR | reason=launchctl_failed exit=%d", exc.returncode)
         raw_output = ""
     except FileNotFoundError:
-        logger.error("launchctl not found — not running on macOS?")
+        logger.error("SERVICE CHECKER: ERROR | reason=launchctl_not_found platform=non-macOS")
         raw_output = ""
 
     entries = _parse_launchctl_output(raw_output, target_services)
@@ -144,10 +144,11 @@ def run_service_checks(target_services: list[str] = TARGET_SERVICES) -> ServiceC
     for s in entries:
         if s.is_target:
             if s.healthy:
-                logger.info("Service OK — %s (PID %s)", s.name, s.pid)
+                logger.info("SERVICE STATUS: OK | name=%s pid=%s", s.name, s.pid)
             else:
                 logger.warning(
-                    "Service UNHEALTHY — %s (PID %s, exit %s)", s.name, s.pid, s.exit_status
+                    "SERVICE STATUS: WARNING | name=%s pid=%s exit=%s",
+                    s.name, s.pid, s.exit_status,
                 )
 
     result = ServiceCheckResult(
@@ -156,7 +157,7 @@ def run_service_checks(target_services: list[str] = TARGET_SERVICES) -> ServiceC
         services=entries,
     )
     logger.info(
-        "Service check complete — %d targets, %d unhealthy, overall: %s",
+        "SERVICE CHECKER: COMPLETE | targets=%d unhealthy=%d overall=%s",
         len(result.targets), len(result.unhealthy), result.overall,
     )
     return result
