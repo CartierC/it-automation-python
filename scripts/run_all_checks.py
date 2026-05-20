@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # scripts/run_all_checks.py
 import json
+import logging
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -12,12 +14,20 @@ from core.process_monitor import run_process_monitor
 from core.service_checker import run_service_checks
 from core.system_health import run_health_check
 
+logger = logging.getLogger(__name__)
+
 
 def build_report(health_result, process_result, service_result) -> dict:
     statuses = (health_result.overall, process_result.overall, service_result.overall)
+    if "CRITICAL" in statuses:
+        combined = "CRITICAL"
+    elif any(s in ("WARNING", "ALERT") for s in statuses):
+        combined = "WARNING"
+    else:
+        combined = "OK"
     return {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "overall": "ALERT" if "ALERT" in statuses else "OK",
+        "overall": combined,
         "health_check": {
             "overall": health_result.overall,
             "hostname": health_result.hostname,
@@ -27,6 +37,7 @@ def build_report(health_result, process_result, service_result) -> dict:
                     "name": m.name,
                     "value": m.value,
                     "threshold": m.threshold,
+                    "crit_threshold": m.crit_threshold,
                     "unit": m.unit,
                     "status": m.status,
                 }
@@ -61,7 +72,13 @@ def print_summary(report: dict, report_path: Path) -> None:
     pm = report["process_monitor"]
     sc = report["service_checker"]
     overall = report["overall"]
-    flag = "⚠️  ALERT" if overall == "ALERT" else "✓  OK"
+
+    if overall == "CRITICAL":
+        flag = "✗  CRITICAL"
+    elif overall == "WARNING":
+        flag = "⚠️  WARNING"
+    else:
+        flag = "✓  OK"
 
     lines = [
         "",
@@ -78,7 +95,7 @@ def print_summary(report: dict, report_path: Path) -> None:
         f"  Status     : {hc['overall']}",
     ]
     for m in hc["metrics"]:
-        icon = "⚠️ " if m["status"] == "ALERT" else "✓ "
+        icon = "⚠️ " if m["status"] != "OK" else "✓ "
         lines.append(f"    {icon} {m['name']:<12} {m['value']:>6.1f}%  [{m['status']}]")
 
     lines += [
@@ -115,20 +132,31 @@ def print_summary(report: dict, report_path: Path) -> None:
 
 
 def main() -> int:
-    print("Running health check...", flush=True)
+    t0 = time.perf_counter()
+
+    logger.info("Orchestration started | checks=health,process,service")
+
     health_result = run_health_check()
+    logger.info("Health check complete | status=%s", health_result.overall)
 
-    print("Running process monitor...", flush=True)
     process_result = run_process_monitor()
+    logger.info("Process monitor complete | status=%s", process_result.overall)
 
-    print("Running service checker...", flush=True)
     service_result = run_service_checks()
+    logger.info("Service checker complete | status=%s", service_result.overall)
 
     report = build_report(health_result, process_result, service_result)
     report_path = write_report(report)
     print_summary(report, report_path)
 
-    return 0 if report["overall"] == "OK" else 1
+    duration = time.perf_counter() - t0
+    exit_codes = {"OK": 0, "WARNING": 1, "CRITICAL": 2}
+    exit_code = exit_codes.get(report["overall"], 1)
+    logger.info(
+        "Orchestration complete | overall=%s exit_code=%d duration=%.2fs",
+        report["overall"], exit_code, duration,
+    )
+    return exit_code
 
 
 if __name__ == "__main__":

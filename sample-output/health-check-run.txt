@@ -1,0 +1,55 @@
+[2026-05-20 14:12:14] [INFO] Orchestration started | checks=health,process,service
+[2026-05-20 14:12:14] [INFO] Starting health check on Carters-MacBook-Pro.local
+[2026-05-20 14:12:15] [INFO] CPU STATUS: OK | usage=2.7%
+[2026-05-20 14:12:15] [INFO] MEMORY STATUS: OK | usage=44.2% available=26.8GB
+[2026-05-20 14:12:15] [INFO] DISK STATUS: OK | usage=0.7% mount=/
+[2026-05-20 14:12:15] [INFO] Health check completed | exit_code=0 duration=1.01s
+[2026-05-20 14:12:15] [INFO] Health check complete | status=OK
+[2026-05-20 14:12:15] [INFO] Starting process monitor — top 10, CPU threshold 50%
+[2026-05-20 14:12:16] [WARNING] CPU threshold breach — PID 903 (mediaanalysisd) at 96.8% (threshold 50%)
+[2026-05-20 14:12:16] [INFO] Process — PID 1322 (Code Helper (GPU)) CPU 5.6% MEM 0.3%
+[2026-05-20 14:12:16] [INFO] Process — PID 3458 (Python) CPU 5.3% MEM 0.0%
+[2026-05-20 14:12:16] [INFO] Process — PID 1330 (Code Helper (Renderer)) CPU 4.3% MEM 1.0%
+[2026-05-20 14:12:16] [INFO] Process — PID 1396 (Code Helper (Renderer)) CPU 2.9% MEM 0.6%
+[2026-05-20 14:12:16] [INFO] Process — PID 1951 (claude) CPU 2.0% MEM 0.7%
+[2026-05-20 14:12:16] [INFO] Process — PID 1711 (Code Helper (Plugin)) CPU 1.9% MEM 1.3%
+[2026-05-20 14:12:16] [INFO] Process — PID 3434 (mdworker_shared) CPU 1.3% MEM 0.1%
+[2026-05-20 14:12:16] [INFO] Process — PID 2501 (spotlightknowledged) CPU 1.2% MEM 0.1%
+[2026-05-20 14:12:16] [INFO] Process — PID 714 (Microsoft OneNote) CPU 0.6% MEM 0.6%
+[2026-05-20 14:12:16] [INFO] Process monitor complete — 10 processes, 1 flagged, overall: ALERT
+[2026-05-20 14:12:16] [INFO] Process monitor complete | status=ALERT
+[2026-05-20 14:12:16] [INFO] Starting service check — 2 target(s)
+[2026-05-20 14:12:16] [INFO] Service OK — com.apple.Finder (PID 743)
+[2026-05-20 14:12:16] [INFO] Service OK — com.apple.Safari.SafeBrowsing.Service (PID 1020)
+[2026-05-20 14:12:16] [INFO] Service check complete — 2 targets, 0 unhealthy, overall: OK
+[2026-05-20 14:12:16] [INFO] Service checker complete | status=OK
+[2026-05-20 14:12:16] [INFO] Orchestration complete | overall=WARNING exit_code=1 duration=1.57s
+
+  ┌─────────────────────────────────────────┐
+  │         COMBINED AUTOMATION REPORT       │
+  └─────────────────────────────────────────┘
+
+  Generated  : 2026-05-20 14:12:16
+  Overall    : ⚠️  WARNING
+
+  ── Health Check ──────────────────────────
+  Host       : Carters-MacBook-Pro.local
+  Platform   : Darwin 25.5.0
+  Status     : OK
+    ✓  CPU Usage       2.7%  [OK]
+    ✓  Memory         44.2%  [OK]
+    ✓  Disk Usage      0.7%  [OK]
+
+  ── Process Monitor ───────────────────────
+  Status     : ALERT
+  Zombies    : 0
+  Flagged    : 1
+    ⚠️  PID    903  mediaanalysisd             CPU 96.8%
+
+  ── Service Checker ───────────────────────
+  Status     : OK
+  Targets    : 2
+  Unhealthy  : 0
+
+  Report     : /Users/carter/Projects/Automation/it-automation-python/logs/report_2026-05-20_141216.json
+

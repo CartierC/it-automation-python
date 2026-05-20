@@ -44,27 +44,27 @@ def test_check_cpu_status_ok_below_threshold(mock_cpu):
 @patch("core.system_health.psutil.cpu_percent", return_value=92.0)
 def test_check_cpu_status_alert_above_threshold(mock_cpu):
     result = check_cpu(threshold=85.0)
-    assert result.status == "ALERT"
+    assert result.status == "WARNING"
 
 
 @patch("core.system_health.psutil.cpu_percent", return_value=85.0)
 def test_check_cpu_status_alert_at_threshold(mock_cpu):
     result = check_cpu(threshold=85.0)
-    assert result.status == "ALERT"
+    assert result.status == "WARNING"
 
 
 # ── check_memory ──────────────────────────────────────────────────────────────
 
 @patch("core.system_health.psutil.virtual_memory")
 def test_check_memory_returns_metric_result(mock_mem):
-    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3, available=6 * 1024 ** 3)
     result = check_memory(threshold=80.0)
     assert isinstance(result, MetricResult)
 
 
 @patch("core.system_health.psutil.virtual_memory")
 def test_check_memory_correct_value(mock_mem):
-    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3, available=6 * 1024 ** 3)
     result = check_memory(threshold=80.0)
     assert result.name == "Memory"
     assert result.value == TEST_MEM_MOCK_VALUE
@@ -73,16 +73,16 @@ def test_check_memory_correct_value(mock_mem):
 
 @patch("core.system_health.psutil.virtual_memory")
 def test_check_memory_status_ok(mock_mem):
-    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3, available=6 * 1024 ** 3)
     result = check_memory(threshold=80.0)
     assert result.status == "OK"
 
 
 @patch("core.system_health.psutil.virtual_memory")
 def test_check_memory_status_alert(mock_mem):
-    mock_mem.return_value = MagicMock(percent=88.0, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=88.0, total=16 * 1024 ** 3, available=2 * 1024 ** 3)
     result = check_memory(threshold=80.0)
-    assert result.status == "ALERT"
+    assert result.status == "WARNING"
 
 
 # ── check_disk ────────────────────────────────────────────────────────────────
@@ -114,7 +114,7 @@ def test_check_disk_status_ok(mock_disk):
 def test_check_disk_status_alert(mock_disk):
     mock_disk.return_value = MagicMock(percent=95.0, total=500 * 1024 ** 3)
     result = check_disk(threshold=90.0)
-    assert result.status == "ALERT"
+    assert result.status == "CRITICAL"
 
 
 # ── run_health_check ──────────────────────────────────────────────────────────
@@ -123,7 +123,7 @@ def test_check_disk_status_alert(mock_disk):
 @patch("core.system_health.psutil.virtual_memory")
 @patch("core.system_health.psutil.disk_usage")
 def test_run_health_check_returns_health_check_result(mock_disk, mock_mem, mock_cpu):
-    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3, available=6 * 1024 ** 3)
     mock_disk.return_value = MagicMock(percent=TEST_DISK_MOCK_VALUE, total=500 * 1024 ** 3)
     result = run_health_check()
     assert isinstance(result, HealthCheckResult)
@@ -133,10 +133,10 @@ def test_run_health_check_returns_health_check_result(mock_disk, mock_mem, mock_
 @patch("core.system_health.psutil.virtual_memory")
 @patch("core.system_health.psutil.disk_usage")
 def test_run_health_check_has_required_fields(mock_disk, mock_mem, mock_cpu):
-    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3, available=6 * 1024 ** 3)
     mock_disk.return_value = MagicMock(percent=TEST_DISK_MOCK_VALUE, total=500 * 1024 ** 3)
     result = run_health_check()
-    assert result.overall in ("OK", "ALERT")
+    assert result.overall in ("OK", "WARNING", "CRITICAL")
     assert result.hostname
     assert result.platform
     assert result.timestamp
@@ -147,7 +147,7 @@ def test_run_health_check_has_required_fields(mock_disk, mock_mem, mock_cpu):
 @patch("core.system_health.psutil.virtual_memory")
 @patch("core.system_health.psutil.disk_usage")
 def test_run_health_check_overall_ok_when_all_clear(mock_disk, mock_mem, mock_cpu):
-    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3, available=6 * 1024 ** 3)
     mock_disk.return_value = MagicMock(percent=TEST_DISK_MOCK_VALUE, total=500 * 1024 ** 3)
     result = run_health_check()
     assert result.overall == "OK"
@@ -157,7 +157,7 @@ def test_run_health_check_overall_ok_when_all_clear(mock_disk, mock_mem, mock_cp
 @patch("core.system_health.psutil.virtual_memory")
 @patch("core.system_health.psutil.disk_usage")
 def test_run_health_check_overall_alert_on_breach(mock_disk, mock_mem, mock_cpu):
-    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3)
+    mock_mem.return_value = MagicMock(percent=TEST_MEM_MOCK_VALUE, total=16 * 1024 ** 3, available=6 * 1024 ** 3)
     mock_disk.return_value = MagicMock(percent=TEST_DISK_MOCK_VALUE, total=500 * 1024 ** 3)
     result = run_health_check()
-    assert result.overall == "ALERT"
+    assert result.overall == "CRITICAL"
