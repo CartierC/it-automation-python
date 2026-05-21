@@ -58,7 +58,9 @@ class MetricResult:
         flag = "✓  " if self.status == "OK" else "⚠️ "
         return (
             f"{flag}{self.name:<12} {self.value:>6.1f}{self.unit}"
-            f"  (warn: {self.threshold}{self.unit}, crit: {self.crit_threshold}{self.unit})  [{self.status}]"
+            f"  (warn: {self.threshold}{self.unit},"
+            f" crit: {self.crit_threshold}{self.unit})"
+            f"  [{self.status}]"
         )
 
 
@@ -122,7 +124,9 @@ def check_memory(threshold: float = MEM_WARN, crit_threshold: float = MEM_CRIT) 
     return result
 
 
-def check_disk(threshold: float = DISK_WARN, crit_threshold: float = DISK_CRIT, path: str = "/") -> MetricResult:
+def check_disk(
+    threshold: float = DISK_WARN, crit_threshold: float = DISK_CRIT, path: str = "/"
+) -> MetricResult:
     disk = psutil.disk_usage(path)
     value = disk.percent
     result = MetricResult("Disk Usage", value, threshold, crit_threshold)
