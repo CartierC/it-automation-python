@@ -85,7 +85,7 @@ pytest tests/ -v
 
 ## Sample Output
 
-Real execution artifact: [`sample-output/health-check-run.txt`](sample-output/health-check-run.txt)
+Real execution artifact: [`sample-output/health-check-run.txt`](sample-output/health-check-run.txt) | Terminal screenshot: [`sample-output/health-check-screenshot.png`](sample-output/health-check-screenshot.png)
 
 ```
 [2026-05-20 14:12:14] [INFO] Orchestration started | checks=health,process,service
