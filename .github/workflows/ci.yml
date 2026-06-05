@@ -2,7 +2,7 @@ name: CI - IT Automation Python
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/tier-3-observability ]
   pull_request:
 
 jobs:
