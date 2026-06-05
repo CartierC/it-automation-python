@@ -2,21 +2,25 @@ name: CI - IT Automation Python
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/tier-2-ci-proof ]
   pull_request:
 
 jobs:
   build-test-lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+      fail-fast: false
 
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
@@ -26,11 +30,14 @@ jobs:
     - name: Run lint
       run: flake8 .
 
-    - name: Run tests
-      run: pytest --maxfail=1 --disable-warnings -q
+    - name: Run tests with coverage
+      run: |
+        pytest --maxfail=1 --disable-warnings -q \
+          --cov=core --cov=tools \
+          --cov-report=term-missing
 
     - name: Upload observability artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: observability-report
+        name: observability-report-py${{ matrix.python-version }}
         path: sample-output/
